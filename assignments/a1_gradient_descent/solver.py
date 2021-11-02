@@ -15,23 +15,30 @@ class Gradient(NLPSolver):
 
     def fixed_step_search(self, x):
         iteration = 0
+        max_iteration = 40
         step_sz = np.random.uniform(0.01, 0.02) # alpha
+        # x_0 = x.copy() # needs fix
 
         if(self.verbose): 
             print("commencing gradient descent with fixed stepsize (alpha = %.5f)" % step_sz)
 
         while True:
+            if(iteration == max_iteration):
+                iteration = 0 
+                step_sz = np.random.uniform(0.01, 0.02)
+                # x = x_0.copy() # needs fix
+                if(self.verbose):
+                    print("continuing gradient descent with new fixed stepsize (alpha = %.5f)" % step_sz)
             f_x, ff_x = self.evaluate(x)
 
             if(self.verbose):
                 print("iteration %d: x = %s, f(x) = %.5f" % (iteration, np.array2string(x,precision=2), f_x))
                 iteration += 1
-           
+            
             if abs(f_x) < self.tolerance:
                 return x
 
-            step_dir = -ff_x / np.linalg.norm(ff_x)
-            x += step_sz * step_dir
+            x -= step_sz * ff_x 
 
     def line_search(self, x) :
         iteration = 0
