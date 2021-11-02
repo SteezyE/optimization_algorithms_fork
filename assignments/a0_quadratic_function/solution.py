@@ -6,62 +6,37 @@ from optimization_algorithms.interface.mathematical_program import  Mathematical
 
 
 class Problem0( MathematicalProgram ):
-    """
-    """
 
     def __init__(self,C):
-
-        # in case you want to initialize some class members or so...
-
+        
+        self.C = C
+        self.A = self.C.T @ self.C # @ matrix product
 
     def evaluate(self, x) :
-        """
-        See also:
-        ----
-        MathematicalProgram.evaluate
-        """
 
-        # add the main code here! E.g. define methods to compute value y and Jacobian J
-        # y = ...
-        # J = ...
-
-        # and return as a tuple of arrays, namely of dim (1) and (1,n)
-        #return  np.array( [ y ] ) ,  J.reshape(1,-1)
+        # compute value y and Jacobian J
+        # TODO: x.T transponiert vector nicht vernünftig
+        y = x @ self.A @ x[:,np.newaxis] # x[:,np.newaxis] changes dimension (1-D to 2-D) and .T
+        J = x @ self.A + x @ self.A.T 
+        # tuple of arrays, dim (1) and (1,n)
+        # return y, J
+        return np.array([y]), J.reshape(1,-1)
 
     def getDimension(self) : 
-        """
-        See Also
-        ------
-        MathematicalProgram.getDimension
-        """
-        # return the input dimensionality of the problem, e.g.
+
+        # input dimensionality of the problem
         return 2
 
     def getFHessian(self, x) : 
-        """
-        See Also
-        ------
-        MathematicalProgram.getFHessian
-        """
+
         # add code to compute the Hessian matrix
-
-        # H = ...
-
-        # and return it
-        #return H
+        H = self.A + self.A.T 
+        return H
 
     def getInitializationSample(self) : 
-        """
-        See Also
-        ------
-        MathematicalProgram.getInitializationSample
-        """
+
         return np.ones(self.getDimension())
 
     def report(self , verbose ): 
-        """
-        See Also
-        ------
-        MathematicalProgram.report
-        """
+
         return "Quadratic function x C^T C x "
