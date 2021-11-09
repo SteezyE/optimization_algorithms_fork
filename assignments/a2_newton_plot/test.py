@@ -60,6 +60,23 @@ class testGradientDescent(unittest.TestCase):
         output = gradient.line_search(x_0,self.Cinv)
         self.assertTrue(True)
 
-    
+    def testSquareFunctionNewton(self): 
+        print("\n---[testing square function (dim=%d) w/o C^-1]------------------------" % self.dim)
+        square = MathematicalProgramTraced(Square(self.C)) 
+        gradient = Gradient()
+        gradient.setProblem((square))
+        x_0 = np.array([1.0 for x in range(self.dim)])
+        output = gradient.newton(x_0)
+        self.assertTrue(True)
+
+    def testHoleFunctionNewton(self):
+        print("\n---[testing hole function (dim=%d) w/o C^-1]--------------------------" % self.dim)
+        hole = MathematicalProgramTraced(Hole(self.C,self.a))
+        gradient = Gradient()
+        gradient.setProblem((hole))
+        x_0 = np.array([1.0 for x in range(self.dim)])
+        output = gradient.newton(x_0)
+        self.assertTrue(True)
+
 if __name__ == "__main__":
    unittest.main()

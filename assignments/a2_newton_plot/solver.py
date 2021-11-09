@@ -49,3 +49,45 @@ class Gradient(NLPSolver):
                 step_sz *= step_dec 
             x += step_sz * step_dir
             step_sz *= step_inc
+
+    def newton(self, x):
+        counter = 0
+        iteration = 0
+        step_sz = 1.0 # alpha
+        step_inc = 1.2 # phi_alpha^plus 
+        step_dec = 0.5 # phi_alpha^minus
+        step_dec_min = 0.01 # phi_ls 
+        eigen_shift = 1.0 # lambda
+
+        if(self.verbose):
+            print("commencing newton method with line search and fallback")
+
+        while True:
+            f_x, ff_x = self.evaluate(x) 
+            fff_x = self.problem.getFHessian(x)
+            shift = eigen_shift * np.eye(x.shape[0])
+            
+            if(self.verbose):
+                print("iteration %d: f(x) = %.5f, alpha = %.5f" % (iteration, f_x, step_sz))
+                iteration += 1
+
+            try:
+                step_dir = np.linalg.solve(fff_x + shift, -ff_x)
+            except:
+                step_dir = -ff_x / np.linalg.norm(ff_x)             
+
+            if np.linalg.norm(step_sz * step_dir, ord=1) < self.tolerance:
+                if counter == 10:
+                    return x
+                else:
+                    counter += 1
+            else: 
+                counter = 0
+
+            f_xs, ff_xs = self.evaluate(x + step_sz * step_dir)
+            while np.all(np.greater(f_xs, f_x + step_dec_min * np.transpose(ff_x) @ (step_sz * step_dir))):
+                f_x, ff_x = self.evaluate(x) 
+                f_xs, ff_xs = self.evaluate(x + step_sz * step_dir)
+                step_sz *= step_dec 
+            x += step_sz * step_dir
+            step_sz *= step_inc
