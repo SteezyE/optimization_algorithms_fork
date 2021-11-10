@@ -73,6 +73,7 @@ class Gradient(NLPSolver):
 
             try:
                 step_dir = np.linalg.solve(fff_x + shift, -ff_x)
+                if ff_x @ step_dir[:,np.newaxis] > 0.0: step_dir = -ff_x / np.linalg.norm(ff_x) 
             except:
                 step_dir = -ff_x / np.linalg.norm(ff_x)             
 
