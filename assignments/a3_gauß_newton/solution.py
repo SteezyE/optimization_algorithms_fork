@@ -1,8 +1,70 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import sys
+
 sys.path.append("../../..")
 
 from optimization_algorithms.interface.nlp_solver import NLPSolver
+from optimization_algorithms.interface.mathematical_program import MathematicalProgram
+
+class Plot:
+    def plotFunc(self, f, bounds_lo, bounds_up, trace_xy = None, trace_z = None):
+        x = np.linspace(bounds_lo[0], bounds_up[0], 30)
+        y = np.linspace(bounds_lo[1], bounds_up[1], 30)
+        xMesh, yMesh = np.meshgrid(x, y, indexing='ij')
+        zMesh = np.zeros_like(xMesh)
+
+        for i in range(x.shape[0]):
+            for j in range(y.shape[0]):
+                zMesh[i,j] = f([xMesh[i,j], yMesh[i,j]])
+
+        fig = plt.figure(figsize=(12,6))
+        ax1 = fig.add_subplot(121, projection="3d")
+        surf = ax1.plot_surface(xMesh, yMesh, zMesh, cmap=cm.coolwarm)
+
+        if trace_xy is not None: ax1.plot(trace_xy[:,0], trace_xy[:,1], trace_z[:,0], 'ko-', linewidth=1.0, markersize=2.0)
+
+        fig.colorbar(surf)
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('y')
+        ax1.set_zlabel('f')
+        ax2 = fig.add_subplot(122)
+        surf2 = plt.contourf(xMesh, yMesh, zMesh, cmap=cm.coolwarm)
+
+        if trace_xy is not None: ax2.plot(trace_xy[:,0], trace_xy[:,1], 'ko-', linewidth=1.0, markersize=2.0)
+
+        fig.colorbar(surf2)
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('y')
+
+        plt.show()	
+
+class Feature(MathematicalProgram):
+    def __init__(self,a,c):
+        self.a = a
+        self.c = c
+
+    def evaluate(self, x):
+        f = np.array([np.sin(self.a*x[0]),
+                      np.sin(self.a*self.c*x[1]),
+                      2*x[0],
+                      2*self.c*x[1]])
+        y = f.T @ f        
+        J = np.array([[self.a*np.cos(self.a*x[0]), 0.0                                     ],
+                      [0.0,                        self.a*self.c*np.cos(self.a*self.c*x[1])], 
+                      [1.0,                        0.0                                     ],
+                      [0.0,                        self.c                                  ]])
+        G = 2 * J.T @ f[:,np.newaxis]
+        return np.array([y]), G.reshape(1,-1) # f_x, ff_x    
+
+    def getFHessian(self, x):
+        J = np.array([[self.a*np.cos(self.a*x[0]), 0.0                                     ],
+                      [0.0,                        self.a*self.c*np.cos(self.a*self.c*x[1])], 
+                      [1.0,                        0.0                                     ],
+                      [0.0,                        self.c                                  ]])
+        return 2 * J.T @ J # Gauß-Newton approximation for Hessian
 
 class Solver(NLPSolver):
     def __init__(self, itercnt=100):

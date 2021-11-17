@@ -8,9 +8,7 @@ from optimization_algorithms.interface.nlp_solver import  NLPSolver
 from optimization_algorithms.interface.mathematical_program import MathematicalProgram
 from optimization_algorithms.interface.mathematical_program_traced import  MathematicalProgramTraced
 
-from functions import Feature 
-from solver import Solver 
-from plotter import Plot
+from solution import Solver, Feature, Plot 
 
 class testGradientDescent(unittest.TestCase):
 
