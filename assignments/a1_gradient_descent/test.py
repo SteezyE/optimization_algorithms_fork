@@ -8,8 +8,7 @@ from optimization_algorithms.interface.nlp_solver import  NLPSolver
 from optimization_algorithms.interface.mathematical_program import MathematicalProgram
 from optimization_algorithms.interface.mathematical_program_traced import  MathematicalProgramTraced
 
-from functions import Square, Hole 
-from solver import Gradient 
+from solution import Gradient, Square, Hole
 
 class testGradientDescent(unittest.TestCase):
 
